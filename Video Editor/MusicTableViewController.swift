@@ -45,8 +45,11 @@ class MusicTableViewController: UITableViewController {
     }
 
     @IBAction func readyButton(_ sender: Any) {
-        delegate?.soundListUpdate(soundListUrls, soundListNames)
+        self.delegate?.soundListUpdate(self.soundListUrls, self.soundListNames)
         self.delegate?.musicDidChosen()
+
+
+
         self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
     
@@ -162,11 +165,7 @@ class MusicTableViewController: UITableViewController {
 
         tableView.isEditing = false
     }
-    
-
-
- 
-    
+       
     func chooseAssetInMediaPlayer () {
         
         let picker = MPMediaPickerController(mediaTypes: .anyAudio)
@@ -178,7 +177,7 @@ class MusicTableViewController: UITableViewController {
     }
     
     func chooseFileInDocPicker () {
-        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.aiff, UTType.mp3, UTType.midi, UTType.wav])
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.aiff, UTType.mp3, UTType.midi, UTType.wav, UTType.audio])
         documentPicker.delegate = self
         documentPicker.allowsMultipleSelection = false
         present(documentPicker, animated: true, completion: nil)
@@ -217,16 +216,15 @@ extension MusicTableViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
 
         for url in urls {
-            soundListUrls.append(url)
+         soundListUrls.append(url)
          let selectedFilePath = url.absoluteString
          let name = fileManager.displayName(atPath: selectedFilePath).replacingOccurrences(of: "%20", with: " ")
-            soundListNames.append(name)
+         soundListNames.append(name)
          tableData[1].labelText.append(name)
         }
         tableView.reloadData()
-
     }
-    
+
 }
 
 extension MusicTableViewController: MPMediaPickerControllerDelegate {

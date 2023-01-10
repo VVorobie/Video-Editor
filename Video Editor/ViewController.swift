@@ -38,7 +38,35 @@ class ViewController: UIViewController {
         
         filtersStack.isHidden = true
         audioChoosingButton.isEnabled = false
+        videoChoosingButton.isEnabled = false
 
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let readWriteStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        
+        switch readWriteStatus {
+        case .authorized:
+            videoChoosingButton.isEnabled = true
+        case .limited:
+            videoChoosingButton.isEnabled = true
+            alertCall(self, "Внимание", VideoEditorErrors.authorizationLimited.rawValue)
+        default:
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+                if status == .authorized || status == .limited {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        self.videoChoosingButton.isEnabled = true
+                    }
+                }
+                else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        alertCall(self, "Внимание", VideoEditorErrors.authorizationError.rawValue)
+                    }
+                }
+            }
+        }
     }
 
     @IBAction func videoChoosingButton(_ sender: UIButton) {}
@@ -100,7 +128,8 @@ extension ViewController: PlayerViewControllerDelegate {
         view.addSubview(shadowView)
 
             DispatchQueue.main.async {[weak self] in
-                self?.spinner = UIActivityIndicatorView(style: .whiteLarge)
+//                self?.spinner = UIActivityIndicatorView(style: .whiteLarge)
+                self?.spinner = UIActivityIndicatorView(style: .large)
                 self?.spinner.frame = CGRect(x: 0.0, y: 0.0, width: 80.0, height: 80.0)
                 self?.spinner.center = CGPoint(x: self!.shadowView.bounds.size.width / 2, y: self!.shadowView.bounds.size.height / 2)
                 self?.view.addSubview(self!.spinner)
@@ -146,7 +175,7 @@ extension ViewController: MusicTableViewControllerDelegate {
             urls.append(track.url)
             names.append(track.title)
         }
-
+        
         if names.count > 1 {
             audioDidChosenLabel.text = "Звук: выбрано " + String(names.count) + " файла "
         } else if names.count == 1 {

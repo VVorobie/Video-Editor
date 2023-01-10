@@ -12,6 +12,8 @@ public enum VideoEditorErrors: String, Error{
 
     case noError = ""
     
+    case authorizationError = "Нет разрешения на пользование фото библиотекой. Вы можете установить его в Настройках"
+    case authorizationLimited = "у вас ограничен выбор видео. Вы можете изменить это в приложении Настройки"
     //VideoCollectionError
     case fetchError = "Фото и видео не найдено! Проверьте интернет (ICloud)"
     case noVideoError = "Видео файлов не найдено!"

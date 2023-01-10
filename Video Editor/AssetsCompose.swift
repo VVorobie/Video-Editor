@@ -7,6 +7,8 @@
 
 import Foundation
 import AVFoundation
+import AVKit
+import AVFAudio
 
 
 
@@ -41,17 +43,34 @@ class AssetCompose {
 
             guard let audioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID:Int32(kCMPersistentTrackID_Invalid) ) else {
                 throw VideoEditorErrors.audioTrackCreationError}
-            var time = CMTime.zero
-            var i = 0
+            
+            func audioTrackIntervalsForming (_ startTime: CMTime, _ intervalDuration: CMTime){
+//                    print ("\(i) time: \(startTime)")
+//                    print ("\(i) duration: \(intervalDuration)")
+                audioAssets[i].loadTracks(withMediaType: .audio) { assetAudioTracks, error in
+                    guard let assetAudioTrack = assetAudioTracks?[0] else {
+                        if let error = error {
+                            print (error)
+                        }
+                        return
+                    }
+                    do {
+                        try audioTrack.insertTimeRange(CMTimeRange(start: .zero, duration: intervalDuration), of: assetAudioTrack, at: startTime)
+                    } catch {
+                        return
+                    }
+                }
+            }
+            
+            var time = CMTime.zero  //duration of suummary sound applied
+            var i = 0           // index of audioAsset in array
             while time < fullVideoDuration {
                 var duration = audioAssets[i].duration
-                if time + duration > fullVideoDuration {duration = fullVideoDuration - time}
-                
-                do {
-                    try audioTrack.insertTimeRange(CMTimeRange(start: .zero, duration: duration), of: audioAssets[i].tracks(withMediaType: .audio)[0], at: time)
-                } catch {
-                    throw VideoEditorErrors.compositionAudioTrackArrayError
+                if time + duration > fullVideoDuration {
+                    duration = fullVideoDuration - time
                 }
+
+                audioTrackIntervalsForming(time, duration)
 
                 time = time + duration
                 i += 1
@@ -60,7 +79,6 @@ class AssetCompose {
         }
         return (composition)
     }
-    
-    
-
 }
+
+

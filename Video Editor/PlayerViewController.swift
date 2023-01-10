@@ -50,6 +50,13 @@ class PlayerViewController: UIViewController {
     
     var newAudioURLs: [URL]? {
         didSet {
+            
+//            var permit = false
+//            if let urls = newAudioURLs {
+//                permit = urls[0].startAccessingSecurityScopedResource()
+//            }
+            
+            let permits = urlPermitions(newAudioURLs)
             do {
                 assetToPlay = try editor?.assetForNewAudio(newAudioURLs)
             } catch  {
@@ -60,6 +67,12 @@ class PlayerViewController: UIViewController {
                 }
                 return
             }
+            urlPermitionsRevoke(permits, newAudioURLs)
+            
+//            if let urls = newAudioURLs {
+//                if permit {urls[0].stopAccessingSecurityScopedResource()}
+//            }
+            
             playerConfig()
             if let filter = filterSeleted{
                 gpuMovie.removeAllTargets()
@@ -119,7 +132,23 @@ class PlayerViewController: UIViewController {
         qualityChooseVC.didMove(toParent: self)
     }
     
- 
+    func urlPermitions (_ urls: [URL]?) -> [Bool] {
+        guard let urls = urls else {return []}
+        var permitions: [Bool] = []
+        for url in urls {
+            permitions.append(url.startAccessingSecurityScopedResource())
+        }
+        return permitions
+    }
+    
+    func urlPermitionsRevoke (_ permits: [Bool], _ urls: [URL]?){
+        guard let urls = urls else {return}
+        for i in 0..<permits.count {
+            if permits[i] {urls[i].stopAccessingSecurityScopedResource()}
+        }
+    }
+    
+    
     func totalReset () {
         
         assetToPlay = nil
